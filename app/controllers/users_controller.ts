@@ -35,10 +35,33 @@ export default class UsersController {
   /**
    * Handle form submission for the edit action
    */
-  async update({ params, request }: HttpContext) {}
+  async update({ params, request, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+    if (user) {
+      const data = request.only(['nombre', 'email', 'password', 'rol'])
+      user.nombre = data.nombre
+      user.email = data.email
+      user.password = data.password
+      user.rol = data.rol
+      await user.save()
+      return response.json(user)
+
+    } else {
+      return response.badRequest({ message: "Usuario no existe" })
+    }
+  }
 
   /**
    * Delete record
    */
-  async destroy({ params }: HttpContext) {}
+  async destroy({ params, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+    if (user) {
+      await user.delete()
+      return response.json({message: "Usuario eliminado!"})
+
+    } else {
+      return response.badRequest({ message: "Usuario no existe" })
+    }
+  }
 }
